@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../d
 # Now import clean_data from the correct module
 from data_clean.data_cleaning import clean_data
 
+
 def test_clean_data():
     # Prepare test data
     raw_data = {
