@@ -1,0 +1,12 @@
+## Requirements
+
+# pip install -r requirements.txt
+
+
+## Run Project
+
+# powershell -ExecutionPolicy Bypass -File .\exec_data_pipeline.ps1
+
+## Clean cache
+
+# Remove-Item -Recurse -Force .\**\__pycache__\
