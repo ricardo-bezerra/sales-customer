@@ -26,10 +26,10 @@
 
 ### Build and execution by Docker
 
-## 1. Criar o container:
+## 1. Container creation:
 ## bash
 # docker build -t data-pipeline .
 
-## 2. Executar o pipeline:
+## 2. Pipeline execution:
 ## bash
 # docker run --rm data-pipeline
