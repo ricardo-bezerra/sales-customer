@@ -4,14 +4,16 @@ import os
 import pytest
 
 # Add the parent directory of 'data_clean' to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../data_clean')))
+# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../data_clean')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Now import clean_data from the correct module
+
+# Import clean_data from the module
 from data_clean.data_cleaning import clean_data
 
 
 def test_clean_data():
-    # Prepare test data
+    # Preparing test data
     raw_data = {
         'name': ['Ricardo Beserra', 'Lusiana Beserra', 'Alícia Bezerra', ' Carlos Lima ', None],
         'age': ['44', '33', 'trinta e cinco', '40', None],
@@ -20,24 +22,25 @@ def test_clean_data():
 
     df = pd.DataFrame(raw_data)
 
-    # Clean the data
+    # Cleaning data
     cleaned_df = clean_data(df)
 
-    # Validate the name cleaning process (whitespace stripped and capitalisation)
+    # Validating name cleaning process (whitespace stripped and capitalisation)
+    # Assert to testing if a condition is true during the execution of the code
     assert cleaned_df['name'].iloc[0] == 'Ricardo Bezerra'
     assert cleaned_df['name'].iloc[1] == 'Luciana Bezerra'
     assert cleaned_df['name'].iloc[2] == 'Alicia Bezerra'
     assert cleaned_df['name'].iloc[3] == 'Carlos Lima'
     assert cleaned_df['name'].iloc[4] == ''
 
-    # Validate age transformation (text to numeric)
+    # Validating age transformation (converts text to numeric)
     assert cleaned_df['age'].iloc[0] == 44
     assert cleaned_df['age'].iloc[1] == 33
     assert cleaned_df['age'].iloc[2] == 35
     assert cleaned_df['age'].iloc[3] == 40
     assert pd.isna(cleaned_df['age'].iloc[4])
 
-    # Validate email cleaning process
+    # Validating email cleaning process
     assert cleaned_df['email'].iloc[0] == 'ricardo@email.com'
     assert cleaned_df['email'].iloc[1] == 'luciana@email.com'
     assert cleaned_df['email'].iloc[2] == 'alicia@email.com'

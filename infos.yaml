@@ -1,12 +1,14 @@
-## Requirements
-
+# Requirements
 # pip install -r requirements.txt
 
-
-## Run Project
-
+# Run Project
 # powershell -ExecutionPolicy Bypass -File .\exec_data_pipeline.ps1
 
-## Clean cache
-
+# Clean cache
 # Remove-Item -Recurse -Force .\**\__pycache__\
+
+# Python MySQL connector
+# pip install mysql-connector-python 
+
+# Create database on MySQL
+# create database sales;
