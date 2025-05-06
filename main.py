@@ -1,6 +1,8 @@
 import pandas as pd
 from data_clean.data_cleaning import clean_data
 
+from databases.mysql_ingestion import Database
+
 from security.security import Config
 cfg = Config()
 

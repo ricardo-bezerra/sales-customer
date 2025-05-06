@@ -2,17 +2,19 @@ import os
 import pandas as pd
 import mysql.connector
 from mysql.connector import Error
-
 from dotenv import load_dotenv
-# Load environment variables from .env file
-load_dotenv()
-
 import logging
 
+# Load environment variables from the .env file
+load_dotenv()
+
 from security.security import Security
-Security()
 
 
+# Logging configuration
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Configuration class for file paths
 class Config:
     def __init__(self):
         self.origin_file = 'origin/customers.csv'
@@ -21,13 +23,14 @@ class Config:
         self.output_parquet = 'output/parquet/customers_data_cleaned.snappy.parquet'
 
 
+# Database interaction class for MySQL
 class Database:
     def __init__(self):
         self.config = Config()
         self.security = Security()
 
     def connect_mysql(self):
-        """ Establish connection to MySQL """
+        """ Establishes the connection to MySQL """
         try:
             connection = mysql.connector.connect(
                 host=self.security.mysql_host,
@@ -36,14 +39,14 @@ class Database:
                 database=self.security.mysql_database
             )
             if connection.is_connected():
-                print("✅ Successfully connected to MySQL database.")
+                logging.info("✅ Successfully connected to MySQL database.")
                 return connection
         except Error as e:
-            print(f"❌ Error connecting to MySQL: {e}")
+            logging.error(f"❌ Error connecting to MySQL: {e}")
             return None
 
     def create_customer_table(self, cursor):
-        """ Create 'customer' table in MySQL if it doesn't already exist """
+        """ Creates the 'customer' table in MySQL if it doesn't already exist """
         create_table_query = """
         CREATE TABLE IF NOT EXISTS customer (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,7 +58,7 @@ class Database:
         cursor.execute(create_table_query)
 
     def insert_data(self, df, connection):
-        """ Insert data from the cleaned CSV DataFrame into the MySQL 'customer' table """
+        """ Inserts data from the cleaned CSV into the MySQL 'customer' table """
         cursor = connection.cursor()
         self.create_customer_table(cursor)
 
@@ -63,30 +66,38 @@ class Database:
         INSERT INTO customer (name, age, email) VALUES (%s, %s, %s)
         """
 
-        for _, row in df.iterrows():
-            cursor.execute(insert_query, (row['name'], row['age'], row['email']))
+        data_to_insert = [(row['name'], row['age'], row['email']) for _, row in df.iterrows()]
 
-        connection.commit()
-        print(f"✅ {cursor.rowcount} rows inserted into 'customer' table.")
+        try:
+            cursor.executemany(insert_query, data_to_insert)
+            connection.commit()
+            logging.info(f"✅ {cursor.rowcount} rows inserted into 'customer' table.")
+        except Error as e:
+            logging.error(f"❌ Error inserting data into MySQL: {e}")
+            connection.rollback()
 
     def close_connection(self, connection):
-        """ Close the MySQL connection """
+        """ Closes the MySQL connection """
         connection.close()
-        print("✅ MySQL connection closed.")
+        logging.info("✅ MySQL connection closed.")
 
 
-# Main ingestion script
+# Main ingestion function
 def main():
-    # Load cleaned data from the CSV file
+    # Load the cleaned data from the CSV file
     csv_path = os.path.join("output", "csv", "customers_data_cleaned.csv")
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
 
     if not os.path.exists(csv_path):
-        print(f"❌ File {csv_path} not found.")
+        logging.error(f"❌ File {csv_path} not found.")
         return
 
-    df = pd.read_csv(csv_path)
-    print(f"✅ {len(df)} registers loaded from {csv_path}.")
+    try:
+        df = pd.read_csv(csv_path)
+        logging.info(f"✅ {len(df)} records loaded from {csv_path}.")
+    except Exception as e:
+        logging.error(f"❌ Error reading CSV file: {e}")
+        return
 
     # Connect to MySQL
     database = Database()
@@ -99,3 +110,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
